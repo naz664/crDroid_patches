@@ -19,7 +19,7 @@ To do that, run these commands:
 ### To initialize your local repository, run this command:
 
 ```bash
-   repo init  --depth=1 --no-repo-verify -u https://github.com/crdroidandroid/android.git -b 14.0
+   repo init  --depth=1 --no-repo-verify -u https://github.com/crdroidandroid/android.git -b 14.0 --git-lfs
 ```
  
 
