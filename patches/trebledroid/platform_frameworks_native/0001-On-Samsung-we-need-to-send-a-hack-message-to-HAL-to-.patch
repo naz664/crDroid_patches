@@ -1,8 +1,8 @@
-From 5d52f6c5b2a32e2f80e819b9cbb93d1fd5cfe50c Mon Sep 17 00:00:00 2001
+From 8bc148b3aa4ba589e53822b59dba261ec9b7a78a Mon Sep 17 00:00:00 2001
 From: Pierre-Hugues Husson <phh@phh.me>
 Date: Wed, 14 Aug 2019 23:37:10 +0200
-Subject: [PATCH 01/13] On Samsung, we need to send a hack-message to HAL to
- get all Sensors
+Subject: [PATCH] On Samsung, we need to send a hack-message to HAL to get all
+ Sensors
 
 Change-Id: Id6a1fa48340de61c418493668e9abd22c2599376
 ---
@@ -10,18 +10,18 @@ Change-Id: Id6a1fa48340de61c418493668e9abd22c2599376
  1 file changed, 3 insertions(+)
 
 diff --git a/services/sensorservice/SensorDevice.cpp b/services/sensorservice/SensorDevice.cpp
-index dd83fde..1996b30 100644
+index f62562ce9d..cd83407027 100644
 --- a/services/sensorservice/SensorDevice.cpp
 +++ b/services/sensorservice/SensorDevice.cpp
-@@ -40,6 +40,7 @@
+@@ -34,6 +34,7 @@
  #include <mutex>
- #include <condition_variable>
+ #include <thread>
  
 +#include <android-base/properties.h>
- using namespace android::hardware::sensors;
- using android::util::ProtoOutputStream;
- 
-@@ -78,6 +79,8 @@ SensorDevice::SensorDevice() : mInHalBypassMode(false) {
+ #include "AidlSensorHalWrapper.h"
+ #include "HidlSensorHalWrapper.h"
+ #include "android/hardware/sensors/2.0/types.h"
+@@ -79,6 +80,8 @@ SensorDevice::SensorDevice() : mInHalBypassMode(false) {
  }
  
  void SensorDevice::initializeSensorList() {

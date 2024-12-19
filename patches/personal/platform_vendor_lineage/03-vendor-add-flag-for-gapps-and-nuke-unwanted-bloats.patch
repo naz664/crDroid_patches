@@ -1,0 +1,52 @@
+From c8c9e3b4d0bfc3979e7c6bcbee0c4b6c0cd9de21 Mon Sep 17 00:00:00 2001
+From: naz664 <nazimnavas145@gmail.com>
+Date: Thu, 19 Dec 2024 08:30:49 +0000
+Subject: [PATCH] vendor: add flag for gapps and nuke unwanted bloats
+
+Signed-off-by: naz664 <nazimnavas145@gmail.com>
+---
+ config/common_mobile_full.mk | 6 ------
+ config/version.mk            | 6 ++++++
+ 2 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/config/common_mobile_full.mk b/config/common_mobile_full.mk
+index 4f1ca68d..69314f20 100644
+--- a/config/common_mobile_full.mk
++++ b/config/common_mobile_full.mk
+@@ -8,7 +8,6 @@ PRODUCT_PACKAGES += \
+     Eleven \
+     Etar \
+     Profiles \
+-    Recorder \
+     Seedvault
+ 
+ ifneq ($(PRODUCT_NO_CAMERA),true)
+@@ -16,11 +15,6 @@ PRODUCT_PACKAGES += \
+     Aperture
+ endif
+ 
+-ifneq ($(TARGET_EXCLUDES_AUDIOFX),true)
+-PRODUCT_PACKAGES += \
+-    AudioFX
+-endif
+-
+ # Extra cmdline tools
+ PRODUCT_PACKAGES += \
+     unrar \
+diff --git a/config/version.mk b/config/version.mk
+index 28d28dfd..adde77ec 100644
+--- a/config/version.mk
++++ b/config/version.mk
+@@ -9,3 +9,9 @@ LINEAGE_VERSION := crDroidAndroid-$(PRODUCT_VERSION_MAJOR).$(PRODUCT_VERSION_MIN
+ 
+ # Display version
+ LINEAGE_DISPLAY_VERSION := crDroidAndroid-$(PRODUCT_VERSION_MAJOR).$(PRODUCT_VERSION_MINOR)-$(LINEAGE_BUILD)-v$(CR_VERSION)
++
++
++ifeq ($(WITH_GAPPS), true)
++    $(call inherit-product, vendor/gapps/common/common-vendor.mk)
++    LINEAGE_BUILD_ZIP_TYPE := GAPPS
++endif
+-- 
+2.34.1
+

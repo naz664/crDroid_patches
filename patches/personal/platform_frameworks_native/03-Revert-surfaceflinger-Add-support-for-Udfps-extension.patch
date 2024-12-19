@@ -1,24 +1,23 @@
-From 16d9d6827247991744b80aff6793582c42da9ba0 Mon Sep 17 00:00:00 2001
+From 377512e6238915407caa1c112b65d9f3cd1e5234 Mon Sep 17 00:00:00 2001
 From: Andy CrossGate Yan <GeForce8800Ultra@gmail.com>
 Date: Mon, 20 Nov 2023 22:00:23 +0800
-Subject: [PATCH 2/2] Revert "surfaceflinger: Add support for Udfps extension
- lib"
+Subject: [PATCH] Revert "surfaceflinger: Add support for Udfps extension lib"
 
 This reverts commit 8655d06e960235c0f9ad079be3541fee2a0359f7.
 ---
  .../CompositionEngine/Android.bp              | 14 +--------
- .../compositionengine/UdfpsExtension.h        | 29 -------------------
- .../CompositionEngine/src/OutputLayer.cpp     | 13 +--------
- .../CompositionEngine/src/UdfpsExtension.cpp  | 27 -----------------
- 4 files changed, 2 insertions(+), 81 deletions(-)
+ .../compositionengine/UdfpsExtension.h        | 31 -------------------
+ .../CompositionEngine/src/OutputLayer.cpp     | 17 +---------
+ .../CompositionEngine/src/UdfpsExtension.cpp  | 31 -------------------
+ 4 files changed, 2 insertions(+), 91 deletions(-)
  delete mode 100644 services/surfaceflinger/CompositionEngine/include/compositionengine/UdfpsExtension.h
  delete mode 100644 services/surfaceflinger/CompositionEngine/src/UdfpsExtension.cpp
 
 diff --git a/services/surfaceflinger/CompositionEngine/Android.bp b/services/surfaceflinger/CompositionEngine/Android.bp
-index 52bc260720..ae2f2dbbf5 100644
+index 8a1de73397..4c9220bb28 100644
 --- a/services/surfaceflinger/CompositionEngine/Android.bp
 +++ b/services/surfaceflinger/CompositionEngine/Android.bp
-@@ -84,16 +84,12 @@ filegroup {
+@@ -86,16 +86,12 @@ filegroup {
          "src/OutputLayer.cpp",
          "src/OutputLayerCompositionState.cpp",
          "src/RenderSurface.cpp",
@@ -36,7 +35,7 @@ index 52bc260720..ae2f2dbbf5 100644
      static_libs: [
          "libsurfaceflinger_common",
          "libsurfaceflingerflags",
-@@ -136,14 +132,6 @@ cc_library {
+@@ -138,14 +134,6 @@ cc_library {
      export_include_dirs: ["include"],
  }
  
@@ -53,12 +52,12 @@ index 52bc260720..ae2f2dbbf5 100644
      test_suites: ["device-tests"],
 diff --git a/services/surfaceflinger/CompositionEngine/include/compositionengine/UdfpsExtension.h b/services/surfaceflinger/CompositionEngine/include/compositionengine/UdfpsExtension.h
 deleted file mode 100644
-index 4306cb4a02..0000000000
+index cf69da9855..0000000000
 --- a/services/surfaceflinger/CompositionEngine/include/compositionengine/UdfpsExtension.h
 +++ /dev/null
-@@ -1,29 +0,0 @@
+@@ -1,31 +0,0 @@
 -/*
-- * Copyright 2021-2022 The LineageOS Project
+- * Copyright 2021-2024 The LineageOS Project
 - *
 - * Licensed under the Apache License, Version 2.0 (the "License");
 - * you may not use this file except in compliance with the License.
@@ -79,15 +78,17 @@ index 4306cb4a02..0000000000
 -#define __UDFPS_EXTENSION__H__
 -
 -#define UDFPS_BIOMETRIC_PROMPT_LAYER_NAME "BiometricPrompt"
+-#define UDFPS_DIM_LAYER_NAME "Dim Layer for UDFPS"
 -#define UDFPS_LAYER_NAME "UdfpsControllerOverlay"
 -#define UDFPS_TOUCHED_LAYER_NAME "SurfaceView[UdfpsControllerOverlay](BLAST)"
 -
+-extern uint32_t getUdfpsDimZOrder(uint32_t z);
 -extern uint32_t getUdfpsZOrder(uint32_t z, bool touched);
 -extern uint64_t getUdfpsUsageBits(uint64_t usageBits, bool touched);
 -
 -#endif /* __UDFPS_EXTENSION__H__ */
 diff --git a/services/surfaceflinger/CompositionEngine/src/OutputLayer.cpp b/services/surfaceflinger/CompositionEngine/src/OutputLayer.cpp
-index 11b9024e99..7fe3369f88 100644
+index ec5d783d99..60e095c49b 100644
 --- a/services/surfaceflinger/CompositionEngine/src/OutputLayer.cpp
 +++ b/services/surfaceflinger/CompositionEngine/src/OutputLayer.cpp
 @@ -18,7 +18,6 @@
@@ -98,14 +99,18 @@ index 11b9024e99..7fe3369f88 100644
  #include <compositionengine/impl/HwcBufferCache.h>
  #include <compositionengine/impl/OutputCompositionState.h>
  #include <compositionengine/impl/OutputLayer.h>
-@@ -459,17 +458,7 @@ void OutputLayer::writeOutputDependentGeometryStateToHWC(HWC2::Layer* hwcLayer,
+@@ -482,21 +481,7 @@ void OutputLayer::writeOutputDependentGeometryStateToHWC(HWC2::Layer* hwcLayer,
                sourceCrop.bottom, to_string(error).c_str(), static_cast<int32_t>(error));
      }
  
 -    uint32_t z_udfps = z;
--    if ((strncmp(getLayerFE().getDebugName(), UDFPS_LAYER_NAME, strlen(UDFPS_LAYER_NAME)) == 0) ||
--        (strncmp(getLayerFE().getDebugName(), UDFPS_BIOMETRIC_PROMPT_LAYER_NAME,
--                 strlen(UDFPS_BIOMETRIC_PROMPT_LAYER_NAME)) == 0)) {
+-    if (strncmp(getLayerFE().getDebugName(),
+-                UDFPS_DIM_LAYER_NAME, strlen(UDFPS_DIM_LAYER_NAME)) == 0) {
+-        z_udfps = getUdfpsDimZOrder(z);
+-    } else if ((strncmp(getLayerFE().getDebugName(), UDFPS_LAYER_NAME,
+-                        strlen(UDFPS_LAYER_NAME)) == 0) ||
+-               (strncmp(getLayerFE().getDebugName(), UDFPS_BIOMETRIC_PROMPT_LAYER_NAME,
+-                        strlen(UDFPS_BIOMETRIC_PROMPT_LAYER_NAME)) == 0)) {
 -        z_udfps = getUdfpsZOrder(z, false);
 -    } else if (strncmp(getLayerFE().getDebugName(), UDFPS_TOUCHED_LAYER_NAME,
 -                       strlen(UDFPS_TOUCHED_LAYER_NAME)) == 0) {
@@ -119,12 +124,12 @@ index 11b9024e99..7fe3369f88 100644
      }
 diff --git a/services/surfaceflinger/CompositionEngine/src/UdfpsExtension.cpp b/services/surfaceflinger/CompositionEngine/src/UdfpsExtension.cpp
 deleted file mode 100644
-index 2d9d086dd2..0000000000
+index 5ae381597d..0000000000
 --- a/services/surfaceflinger/CompositionEngine/src/UdfpsExtension.cpp
 +++ /dev/null
-@@ -1,27 +0,0 @@
+@@ -1,31 +0,0 @@
 -/*
-- * Copyright 2020 The LineageOS Project
+- * Copyright 2020-2024 The LineageOS Project
 - *
 - * Licensed under the Apache License, Version 2.0 (the "License");
 - * you may not use this file except in compliance with the License.
@@ -141,6 +146,10 @@ index 2d9d086dd2..0000000000
 -
 -#ifndef TARGET_PROVIDES_UDFPS_LIB
 -#include <compositionengine/UdfpsExtension.h>
+-
+-uint32_t getUdfpsDimZOrder(uint32_t z) {
+-    return z;
+-}
 -
 -uint32_t getUdfpsZOrder(uint32_t z, __unused bool touched) {
 -    return z;

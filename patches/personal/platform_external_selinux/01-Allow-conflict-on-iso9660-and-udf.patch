@@ -1,0 +1,38 @@
+From e408089b27f00ad624b4ba7b14da51c9e9914b14 Mon Sep 17 00:00:00 2001
+From: mytja <mitja@severkar.eu>
+Date: Mon, 28 Oct 2024 12:44:59 +0100
+Subject: [PATCH] Allow conflict on iso9660 and udf
+
+LineageOS has committed a commit introducing labeling iso9660 and udf filesystems:
+https://github.com/LineageOS/android_device_lineage_sepolicy/commit/70ed191f2b6a6af1ff9387da413e7583766e9268
+
+This caused a bootloop on Samsung Galaxy A53, as vendor SEPolicy is in conflict with system's SEPolicy.
+
+This patch bypasses the conflict, allowing devices with conflicting SEPolicies to boot normally.
+
+Tests: Samsung Galaxy A53 booted with the patch.
+Change-Id: I2d6779734cde337caa394ed8c050ec2d5bf848bb
+---
+ libsepol/cil/src/cil_post.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/libsepol/cil/src/cil_post.c b/libsepol/cil/src/cil_post.c
+index 5428005d..3d764170 100644
+--- a/libsepol/cil/src/cil_post.c
++++ b/libsepol/cil/src/cil_post.c
+@@ -511,7 +511,11 @@ static int cil_post_genfscon_context_compare(const void *a, const void *b)
+          */
+ 		if(strcmp(a_genfscon->path_str, "/sys/vm/watermark_scale_factor") == 0)
+ 			bypass = 1;
+-		if(strcmp(a_genfscon->fs_str, "exfat") == 0 || strcmp(a_genfscon->fs_str, "esdfs") == 0 || strcmp(a_genfscon->fs_str, "fuseblk") == 0) {
++		if(strcmp(a_genfscon->fs_str, "exfat") == 0 ||
++			strcmp(a_genfscon->fs_str, "esdfs") == 0 ||
++			strcmp(a_genfscon->fs_str, "fuseblk") == 0 ||
++			strcmp(a_genfscon->fs_str, "iso9660") == 0 ||
++			strcmp(a_genfscon->fs_str, "udf") == 0) {
+             if(strcmp(a_genfscon->path_str, "/") == 0)
+                 bypass = 1;
+         }
+-- 
+2.34.1
+
