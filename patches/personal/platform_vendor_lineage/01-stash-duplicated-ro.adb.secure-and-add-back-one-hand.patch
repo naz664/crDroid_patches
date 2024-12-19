@@ -1,27 +1,26 @@
-From 3ae1e9bda45be7ecc066ca81a978f809c6d7d22f Mon Sep 17 00:00:00 2001
+From f8c08f459d0d83716fcceea55e52f3d5af0bfd73 Mon Sep 17 00:00:00 2001
 From: naz664 <nazimnavas145@gmail.com>
 Date: Fri, 11 Nov 2022 15:56:11 +0000
-Subject: [PATCH 1/2] stash duplicated ro.adb.secure and add back one-handed
- mode
+Subject: [PATCH] stash duplicated ro.adb.secure and add back one-handed mode
 
 ---
- config/common.mk | 8 +++++++-
- 1 file changed, 7 insertions(+), 1 deletion(-)
+ config/common.mk | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
 
 diff --git a/config/common.mk b/config/common.mk
-index 18265e2a..cf2e24b3 100644
+index 1cde0bf4..5517fc8d 100644
 --- a/config/common.mk
 +++ b/config/common.mk
-@@ -31,7 +31,7 @@ ifeq ($(TARGET_BUILD_VARIANT),eng)
+@@ -36,7 +36,7 @@ ifdef WITH_ADB_INSECURE
  PRODUCT_SYSTEM_DEFAULT_PROPERTIES += ro.adb.secure=0
  else
  # Enable ADB authentication
 -PRODUCT_SYSTEM_DEFAULT_PROPERTIES += ro.adb.secure=1
-+#PRODUCT_SYSTEM_DEFAULT_PROPERTIES += ro.adb.secure=1
++# PRODUCT_SYSTEM_DEFAULT_PROPERTIES += ro.adb.secure=1
+ endif
  
  # Disable extra StrictMode features on all non-engineering builds
- PRODUCT_SYSTEM_DEFAULT_PROPERTIES += persist.sys.strictmode.disable=true
-@@ -263,3 +263,9 @@ include vendor/lineage/config/version.mk
+@@ -272,3 +272,10 @@ include vendor/lineage/config/version.mk
  
  -include $(WORKSPACE)/build_env/image-auto-bits.mk
  -include vendor/lineage/config/partner_gms.mk
@@ -31,6 +30,7 @@ index 18265e2a..cf2e24b3 100644
 +# Enable support of one-handed mode
 +PRODUCT_PRODUCT_PROPERTIES += \
 +    ro.support_one_handed_mode=true
++
 -- 
 2.34.1
 
